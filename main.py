@@ -1,11 +1,9 @@
 import pygame, sys, os
-from pygame import surface
 from pygame.locals import *
 
 from warna import COLORS
 from utils import get_all_image
 from benda import Benda
-from font_teks import FontText
 from button import ButtonText
 
 
@@ -26,14 +24,14 @@ class Window:
 		self.surface.fill(COLORS.light_gray)
 
 # buat Refresh
-def load_img(all_path_img):
+def load_img(all_path_img, width, height):
 	all_imgs = []
 	all_btns = []
 
 	y = 20
 	for img in all_path_img:
 		nama = os.path.basename(img)
-		all_imgs.append(Benda(nama, img, (300,100)))
+		all_imgs.append(Benda(nama, img, (width/2, height/2)))
 		all_btns.append(ButtonText(nama, (20, y), color=(0,0,0), hover_color=(255,255,255)))
 		y += 25
 
@@ -45,14 +43,13 @@ def main():
 
 	window = Window((1000, 640))
 
-	FontText.update()
-
 	all_path_img = get_all_image()
 	# Benda, Button
-	all_imgs, all_btns = load_img(all_path_img)
+	all_imgs, all_btns = load_img(all_path_img, window.size[0], window.size[1])
 
 	# kosong
 	current_img = -1
+	result = []
 
 	while window.run:
 		events = pygame.event.get()
@@ -72,6 +69,7 @@ def main():
 		if current_img != -1:
 			all_imgs[current_img].get_input(events)
 			all_imgs[current_img].grab()
+			all_imgs[current_img].eksekusi_haar()
 		ButtonText.handle_event(events)
 
 
@@ -87,7 +85,6 @@ def main():
 			all_imgs[current_img].render(window.surface)
 			if all_imgs[current_img].draw_rect or not all_imgs[current_img].hide_rect:
 				all_imgs[current_img].render_rect(window.surface)
-
 
 		window.clock.tick(window.fps)
 		pygame.display.flip()
