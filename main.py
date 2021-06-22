@@ -2,9 +2,11 @@ import pygame, sys, os
 from pygame.locals import *
 
 from warna import COLORS
-from utils import get_all_image
+from utils import get_all_image, BoxBergerak
 from benda import Benda
 from button import ButtonText
+from input_box import InputBox
+from font_teks import FontText
 
 
 # Window
@@ -43,13 +45,27 @@ def main():
 
 	window = Window((1000, 640))
 
-	all_path_img = get_all_image()
+	images_path = os.path.join(os.getcwd(), 'images')
+	all_path_img = get_all_image(images_path)
 	# Benda, Button
 	all_imgs, all_btns = load_img(all_path_img, window.size[0], window.size[1])
 
 	# kosong
 	current_img = -1
-	result = []
+	threshold_box = InputBox((200, 20), (50, 20), Benda.threshold, title="Threshold", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
+
+	option_teks = FontText.font_normal.render("Options", True, COLORS.black)
+	option_box = BoxBergerak((150, 50), (200, 200), COLORS.deepskyblue)
+
+	width_feature = Benda.min_feature_width
+	height_feature = Benda.min_feature_height
+	feature_box = BoxBergerak((400, 50), (width_feature, height_feature), COLORS.green_shade)
+
+	min_width_box = InputBox((0, 0), (50, 20), Benda.min_feature_width, title="Min Width", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
+	max_width_box = InputBox((0, 0), (50, 20), Benda.max_feature_width, title="Max Width", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
+	min_height_box = InputBox((0, 0), (50, 20), Benda.min_feature_height, title="Min Height", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
+	max_height_box = InputBox((0, 0), (50, 20), Benda.max_feature_height, title="Max Height", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
+
 
 	while window.run:
 		events = pygame.event.get()
@@ -64,13 +80,62 @@ def main():
 				if event.key == K_ESCAPE:
 					pygame.quit()
 					sys.exit()
+				if event.key == K_1:
+					width_feature += 1
+					if width_feature > Benda.max_feature_width:
+						width_feature = Benda.min_feature_width
+				if event.key == K_3:
+					width_feature -= 1
+					if width_feature < Benda.min_feature_width:
+						width_feature = Benda.max_feature_width
+				if event.key == K_q:
+					height_feature += 1
+					if height_feature > Benda.max_feature_height:
+						height_feature = Benda.min_feature_height
+				if event.key == K_e:
+					height_feature -= 1
+					if height_feature < Benda.min_feature_height:
+						height_feature = Benda.max_feature_height
+
 
 		# Perhitungan
+		option_box.get_input(events)
+		option_box.grab()
+
+		feature_box.rect.width = width_feature
+		feature_box.rect.height = height_feature
+		feature_box.get_input(events)
+		feature_box.grab()
+
+		y = 50
+		for i_box in InputBox.all_input_box:
+			i_box.pos.x = option_box.pos.x + 20
+			i_box.pos.y = option_box.pos.y + y
+			y += 25
+
+		InputBox.handle_event(events)
+		ButtonText.handle_event(events)
+
+		if min_width_box.change:
+			Benda.min_feature_width = min_width_box.value
+			min_width_box.change = False
+		if max_width_box.change:
+			Benda.max_feature_width = max_width_box.value
+			max_width_box.change = False
+		if min_height_box.change:
+			Benda.min_feature_height = min_height_box.value
+			min_height_box.change = False
+		if max_height_box.change:
+			Benda.max_feature_height = max_height_box.value
+			max_height_box.change = False
+
 		if current_img != -1:
+			if threshold_box.change:
+				all_imgs[current_img].threshold = threshold_box.value
+				threshold_box.change = False
 			all_imgs[current_img].get_input(events)
 			all_imgs[current_img].grab()
 			all_imgs[current_img].eksekusi_haar()
-		ButtonText.handle_event(events)
 
 
 		# Gambar
@@ -85,6 +150,14 @@ def main():
 			all_imgs[current_img].render(window.surface)
 			if all_imgs[current_img].draw_rect or not all_imgs[current_img].hide_rect:
 				all_imgs[current_img].render_rect(window.surface)
+
+		option_box.render(window.surface)
+		feature_box.render(window.surface)
+
+		xy_option = (option_box.pos.x + 25, option_box.pos.y + 20)
+		window.surface.blit(option_teks, xy_option)
+		for i_box in InputBox.all_input_box:
+			i_box.render(window.surface)
 
 		window.clock.tick(window.fps)
 		pygame.display.flip()

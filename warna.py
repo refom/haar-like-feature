@@ -5,6 +5,7 @@ class COLORS:
 	whitesmoke = (245,245,245)
 	light_gray = (180,180,180)
 	gray = (150,150,150)
+	dark_gray = (100, 100, 100)
 	black = (0,0,0)
 
 	red = (255, 0, 0)

@@ -1,7 +1,6 @@
 
 from integral import sum_kotak
 
-
 class FeatureType:
     TWO_VERTICAL=(1, 2)
     TWO_HORIZONTAL=(2, 1)
@@ -33,36 +32,57 @@ class HaarLikeFeature(object):
         score = 0
 
         if self.tipe == FeatureType.TWO_VERTICAL:
+            """
+            Atas Putih, Bawah Hitam
+            Putih - Hitam = Atas - Bawah
+            Jika atas putih, maka nilai akhirnya harus positif selain itu brarti atasnya hitam
+            """
             atas = sum_kotak(ii_img, self.top_left, (self.bottom_right[0], int(self.top_left[1] + self.height2)))
             bawah = sum_kotak(ii_img, (self.top_left[0], int(self.top_left[1] + self.height2)), self.bottom_right)
             score = atas - bawah
         elif self.tipe == FeatureType.TWO_HORIZONTAL:
+            # Kiri Putih
             kiri = sum_kotak(ii_img, self.top_left, (int(self.top_left[0] + self.width2), self.bottom_right[1]))
             kanan = sum_kotak(ii_img, (int(self.top_left[0] + self.width2), self.top_left[1]), self.bottom_right)
             score = kiri - kanan
         elif self.tipe == FeatureType.THREE_HORIZONTAL:
+            """
+            Tengah Putih, Kiri Kanan Hitam
+            Putih - Hitam = Tengah - (Kanan + Kiri)
+            Jika Tengah putih, maka nilai akhirnya harus positif selain itu brarti tengahnya adalah hitam
+            """
             kiri = sum_kotak(ii_img, self.top_left, (int(self.top_left[0] + self.width3), self.bottom_right[1]))
             tengah = sum_kotak(ii_img, (int(self.top_left[0] + self.width3), self.top_left[1]), (int(self.top_left[0] + 2 * self.width3), self.bottom_right[1]))
             kanan = sum_kotak(ii_img, (int(self.top_left[0] + 2 * self.width3), self.top_left[1]), self.bottom_right)
-            score = kiri - tengah + kanan
+            score = tengah - (kanan + kiri)
         elif self.tipe == FeatureType.THREE_VERTICAL:
+            # Tengah Putih
             atas = sum_kotak(ii_img, self.top_left, (self.bottom_right[0], int(self.top_left[1] + self.height3)))
             tengah = sum_kotak(ii_img, (self.top_left[0], int(self.top_left[1] + self.height3)), (self.bottom_right[0], int(self.top_left[1] + 2 * self.height3)))
             bawah = sum_kotak(ii_img, (self.top_left[0], int(self.top_left[1] + 2 * self.height3)), self.bottom_right)
-            score = atas - tengah + bawah
+            score = tengah - (atas + bawah)
         elif self.tipe == FeatureType.FOUR:
-            # top left area
+            # Putih
             kiri_atas = sum_kotak(ii_img, self.top_left, (int(self.top_left[0] + self.width2), int(self.top_left[1] + self.height2)))
-            # top right area
+            # Hitam
             kanan_atas = sum_kotak(ii_img, (int(self.top_left[0] + self.width2), self.top_left[1]), (self.bottom_right[0], int(self.top_left[1] + self.height2)))
-            # bottom left area
+            # Hitam
             kiri_bawah = sum_kotak(ii_img, (self.top_left[0], int(self.top_left[1] + self.height2)), (int(self.top_left[0] + self.width2), self.bottom_right[1]))
-            # bottom right area
+            # Putih
             kanan_bawah = sum_kotak(ii_img, (int(self.top_left[0] + self.width2), int(self.top_left[1] + self.height2)), self.bottom_right)
             score = kiri_atas - kanan_atas - kiri_bawah + kanan_bawah
         return score
     
     def get_result(self, ii_img):
         score = self.get_score(ii_img)
-        return (1 if score < self.threshold else -1)
+        return (1 if score > self.threshold else -1)
+
+
+
+
+
+
+
+
+
 
