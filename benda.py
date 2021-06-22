@@ -14,11 +14,11 @@ class Benda:
 	FontText.update()
 	first_mouse_pos = (0,0)
 	last_mouse_pos = (0,0)
-	min_feature_width = 10
-	max_feature_width = 13
-	min_feature_height = 10
-	max_feature_height = 13
-	threshold = 103
+	min_feature_width = 23
+	max_feature_width = 25
+	min_feature_height = 23
+	max_feature_height = 25
+	threshold = 0
 
 	def __init__(self, nama, img, pos):
 		self.nama = nama
@@ -166,11 +166,12 @@ class Benda:
 				self.first_mouse_pos = pygame.mouse.get_pos()
 		# Jika lagi gambar
 		else:
-			# mouse di lepas
-			if not self.button_down:
-				self.draw_rect = False
-			else:
-				self.last_mouse_pos = pygame.mouse.get_pos()
+			pos = pygame.mouse.get_pos()
+			if self.rect.collidepoint(pos):
+				# mouse di lepas
+				if not self.button_down:
+					self.draw_rect = False
+				self.last_mouse_pos = pos
 
 
 	def get_input(self, events):
@@ -182,8 +183,6 @@ class Benda:
 					self.reset_eksekusi()
 			if event.type == pygame.MOUSEBUTTONUP:
 				if event.button == 1:
-					if not self.rect.collidepoint(event.pos):
-						self.hide_rect = True
 					self.button_down = False
 
 

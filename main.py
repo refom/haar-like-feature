@@ -57,14 +57,17 @@ def main():
 	option_teks = FontText.font_normal.render("Options", True, COLORS.black)
 	option_box = BoxBergerak((150, 50), (200, 200), COLORS.deepskyblue)
 
-	width_feature = Benda.min_feature_width
-	height_feature = Benda.min_feature_height
+	width_feature = Benda.max_feature_width
+	height_feature = Benda.max_feature_height
 	feature_box = BoxBergerak((400, 50), (width_feature, height_feature), COLORS.green_shade)
 
 	min_width_box = InputBox((0, 0), (50, 20), Benda.min_feature_width, title="Min Width", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
 	max_width_box = InputBox((0, 0), (50, 20), Benda.max_feature_width, title="Max Width", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
 	min_height_box = InputBox((0, 0), (50, 20), Benda.min_feature_height, title="Min Height", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
 	max_height_box = InputBox((0, 0), (50, 20), Benda.max_feature_height, title="Max Height", text_color=COLORS.black, hover_color=COLORS.dark_gray, active_color=COLORS.white, text_size=22)
+
+	r_teks = FontText.font_normal.render("Right Click for Reset", True, COLORS.black)
+	box_teks = FontText.font_normal.render("Green box is Max Feature size", True, COLORS.black)
 
 
 	while window.run:
@@ -80,30 +83,14 @@ def main():
 				if event.key == K_ESCAPE:
 					pygame.quit()
 					sys.exit()
-				if event.key == K_1:
-					width_feature += 1
-					if width_feature > Benda.max_feature_width:
-						width_feature = Benda.min_feature_width
-				if event.key == K_3:
-					width_feature -= 1
-					if width_feature < Benda.min_feature_width:
-						width_feature = Benda.max_feature_width
-				if event.key == K_q:
-					height_feature += 1
-					if height_feature > Benda.max_feature_height:
-						height_feature = Benda.min_feature_height
-				if event.key == K_e:
-					height_feature -= 1
-					if height_feature < Benda.min_feature_height:
-						height_feature = Benda.max_feature_height
 
 
 		# Perhitungan
 		option_box.get_input(events)
 		option_box.grab()
 
-		feature_box.rect.width = width_feature
-		feature_box.rect.height = height_feature
+		feature_box.rect.width = Benda.max_feature_width
+		feature_box.rect.height = Benda.max_feature_height
 		feature_box.get_input(events)
 		feature_box.grab()
 
@@ -139,25 +126,31 @@ def main():
 
 
 		# Gambar
-		# nama file
-		for idx, btn in enumerate(all_btns):
-			btn.render(window.surface)
-			if btn.get_click():
-				current_img = idx
-		
 		# gambarnya
 		if current_img != -1:
 			all_imgs[current_img].render(window.surface)
 			if all_imgs[current_img].draw_rect or not all_imgs[current_img].hide_rect:
 				all_imgs[current_img].render_rect(window.surface)
 
+		# nama file
+		for idx, btn in enumerate(all_btns):
+			btn.render(window.surface)
+			if btn.get_click():
+				current_img = idx
+
+		# Box
 		option_box.render(window.surface)
 		feature_box.render(window.surface)
 
+		# Option
 		xy_option = (option_box.pos.x + 25, option_box.pos.y + 20)
 		window.surface.blit(option_teks, xy_option)
 		for i_box in InputBox.all_input_box:
 			i_box.render(window.surface)
+		
+		# Info
+		window.surface.blit(r_teks, (20, window.size[1] - 50))
+		window.surface.blit(box_teks, (20, window.size[1] - 30))
 
 		window.clock.tick(window.fps)
 		pygame.display.flip()
